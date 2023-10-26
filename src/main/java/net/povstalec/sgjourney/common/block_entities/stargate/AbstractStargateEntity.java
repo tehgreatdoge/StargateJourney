@@ -2,6 +2,9 @@ package net.povstalec.sgjourney.common.block_entities.stargate;
 
 import java.util.Random;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.ChatFormatting;
@@ -15,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,6 +27,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.network.PacketDistributor;
 import net.povstalec.sgjourney.StargateJourney;
 import net.povstalec.sgjourney.client.sound.SoundWrapper;
@@ -33,6 +43,7 @@ import net.povstalec.sgjourney.common.config.CommonStargateConfig;
 import net.povstalec.sgjourney.common.data.BlockEntityList;
 import net.povstalec.sgjourney.common.data.StargateNetwork;
 import net.povstalec.sgjourney.common.data.Universe;
+import net.povstalec.sgjourney.common.init.ItemInit;
 import net.povstalec.sgjourney.common.init.PacketHandlerInit;
 import net.povstalec.sgjourney.common.init.SoundInit;
 import net.povstalec.sgjourney.common.misc.ArrayHelper;
@@ -66,6 +77,10 @@ public abstract class AbstractStargateEntity extends SGJourneyBlockEntity
 	protected String pointOfOrigin = EMPTY;
 	protected String symbols = EMPTY;
 	
+	// Cover blocks
+	private final ItemStackHandler itemHandler = createHandler();
+	private final LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.of(() -> itemHandler);
+
 	// Dialing and memory
 	protected int[] address = new int[0];
 	protected String connectionID = EMPTY;
@@ -91,6 +106,13 @@ public abstract class AbstractStargateEntity extends SGJourneyBlockEntity
 	}
 	
 	@Override
+	public void invalidateCaps()
+	{
+		super.invalidateCaps();
+		lazyItemHandler.invalidate();
+	}
+	
+	@Override
 	public void load(CompoundTag nbt)
 	{
 		super.load(nbt);
@@ -101,6 +123,8 @@ public abstract class AbstractStargateEntity extends SGJourneyBlockEntity
 		
 		connectionID = nbt.getString("ConnectionID");
 		advancedProtocolsEnabled = nbt.getBoolean("AdvancedProtocolsEnabled");
+
+		itemHandler.deserializeNBT(nbt.getCompound("Inventory"));
 	}
 	
 	@Override
@@ -113,6 +137,8 @@ public abstract class AbstractStargateEntity extends SGJourneyBlockEntity
 		
 		nbt.putString("ConnectionID", connectionID);
 		nbt.putBoolean("AdvancedProtocolsEnabled", advancedProtocolsEnabled);
+
+		nbt.put("Inventory", itemHandler.serializeNBT());
 		super.saveAdditional(nbt);
 	}
 	
@@ -160,7 +186,61 @@ public abstract class AbstractStargateEntity extends SGJourneyBlockEntity
     {
         return new AABB(getCenterPos().getX() - 3, getCenterPos().getY() - 3, getCenterPos().getZ() - 3, getCenterPos().getX() + 4, getCenterPos().getY() + 4, getCenterPos().getZ() + 4);
     }
+	//============================================================================================
+	//****************************************Capabilities****************************************
+	//============================================================================================
 	
+	@Override
+	public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side)
+	{
+		if(capability == ForgeCapabilities.ITEM_HANDLER)
+			return lazyItemHandler.cast();
+		
+		return super.getCapability(capability, side);
+	}
+	
+	//============================================================================================
+	//******************************************Storage*******************************************
+	//============================================================================================
+	
+	private ItemStackHandler createHandler()
+	{
+		return new ItemStackHandler(5)
+			{
+				@Override
+				protected void onContentsChanged(int slot)
+				{
+					setChanged();
+				}
+				
+				@Override
+				public boolean isItemValid(int slot, @Nonnull ItemStack stack)
+				{
+					// Make sure the item is a BlockItem
+					return stack.getItem() instanceof BlockItem;
+				}
+				
+				// Limits the number of items per slot
+				public int getSlotLimit(int slot)
+				{
+					return 1;
+				}
+				
+				@Nonnull
+				@Override
+				public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate)
+				{
+					if(!isItemValid(slot, stack))
+					{
+						return stack;
+					}
+					
+					return super.insertItem(slot, stack, simulate);
+					
+				}
+			};
+	}
+
 	//============================================================================================
 	//******************************************Dialing*******************************************
 	//============================================================================================
