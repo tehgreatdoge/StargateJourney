@@ -1,0 +1,7 @@
+{
+	"type": "sgjourney:pool",
+	"entries": [
+		{"type":"sgjourney:dimension", "value":"sgjourney:chulak", "weight": 4},
+		{"type":"sgjourney:dimension", "value":"sgjourney:cavum_tenebrae", "weight": 1}
+	]
+}

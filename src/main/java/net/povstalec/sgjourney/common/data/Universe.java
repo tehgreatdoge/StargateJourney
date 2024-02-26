@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -53,16 +54,16 @@ public class Universe extends SavedData
 	
 	private static final String FILE_NAME = StargateJourney.MODID + "-universe";
 	
-	private static final String DIMENSIONS = "Dimensions";
-	private static final String SOLAR_SYSTEMS = "SolarSystems";
-	private static final String GALAXIES = "Galaxies";
-	private static final String EXTRAGALACTIC_ADDRESS_INFO = "ExtragalacticAddressInfo";
-	private static final String SOLAR_SYSTEM_DIMENSIONS = "SolarSystemDimensions";
-	private static final String SOLAR_SYSTEM_GALAXIES = "SolarSystemGalaxies";
-	private static final String EXTRAGALACTIC_ADDRESS = "ExtragalacticAddress";
-	private static final String SYMBOLS = "Symbols";
-	private static final String POINT_OF_ORIGIN = "PointOfOrigin";
-	private static final String GENERATED = "Generated";
+	public static final String DIMENSIONS = "Dimensions";
+	public static final String SOLAR_SYSTEMS = "SolarSystems";
+	public static final String GALAXIES = "Galaxies";
+	public static final String EXTRAGALACTIC_ADDRESS_INFO = "ExtragalacticAddressInfo";
+	public static final String SOLAR_SYSTEM_DIMENSIONS = "SolarSystemDimensions";
+	public static final String SOLAR_SYSTEM_GALAXIES = "SolarSystemGalaxies";
+	public static final String EXTRAGALACTIC_ADDRESS = "ExtragalacticAddress";
+	public static final String SYMBOLS = "Symbols";
+	public static final String POINT_OF_ORIGIN = "PointOfOrigin";
+	public static final String GENERATED = "Generated";
 	
 	private static final String EMPTY = StargateJourney.EMPTY;
 	
@@ -376,6 +377,38 @@ public class Universe extends SavedData
 	public CompoundTag getDimensions()
 	{
 		return universe.copy().getCompound(DIMENSIONS);
+	}
+
+	/**
+	 * Returns the address to the specified dimension from the origin dimension.
+	 * Prefers Intragalactic addresses over Extragalactic ones
+	 * @param dimension The dimension to find an address for
+	 * @param origin The dimension to search from
+	 * @return An address as a string or null
+	 */
+	@Nullable
+	public String getAddressToDimension(@Nonnull String dimension,@Nonnull String origin) {
+		ListTag originGalaxies = getGalaxiesFromDimension(origin);
+		ListTag galaxies = getGalaxiesFromDimension(dimension);
+		String out = null;
+		//This seems like a bad idea, who knows
+		for (int i=0; i<galaxies.size(); i++) {
+			for (int j=0; j<originGalaxies.size(); j++) {
+				String galaxy = galaxies.getCompound(i).getAllKeys().iterator().next();
+				if (originGalaxies.getCompound(j).getAllKeys().iterator().next().equals(galaxy)) {
+					out = galaxies.getCompound(i).getString(galaxy);
+					break;
+				}
+			}
+		}
+		if (out != null) {
+			return out;
+		}
+		out = getExtragalacticAddressFromDimension(dimension);
+		if (out.equals(EMPTY)) {
+			return null;
+		}
+		return out;
 	}
 	
 	public String getSolarSystemFromDimension(String dimension)

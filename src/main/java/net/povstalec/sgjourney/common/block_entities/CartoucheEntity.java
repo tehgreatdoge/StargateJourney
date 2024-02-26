@@ -17,12 +17,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraftforge.network.PacketDistributor;
 import net.povstalec.sgjourney.StargateJourney;
 import net.povstalec.sgjourney.common.blocks.CartoucheBlock;
+import net.povstalec.sgjourney.common.data.StargateNetwork;
 import net.povstalec.sgjourney.common.data.Universe;
+import net.povstalec.sgjourney.common.init.AddressTableItemInit;
 import net.povstalec.sgjourney.common.init.BlockEntityInit;
 import net.povstalec.sgjourney.common.init.PacketHandlerInit;
 import net.povstalec.sgjourney.common.packets.ClientboundCartoucheUpdatePacket;
 import net.povstalec.sgjourney.common.stargate.Address;
-import net.povstalec.sgjourney.common.stargate.AddressTable;
+import net.povstalec.sgjourney.common.stargate.address_table.AddressTableItem;
 
 public abstract class CartoucheEntity extends BlockEntity
 {
@@ -106,12 +108,14 @@ public abstract class CartoucheEntity extends BlockEntity
 	{
 		if(level.isClientSide())
 			return;
-		
-		AddressTable addressTable = AddressTable.getAddressTable(level, ResourceLocation.tryParse(this.addressTable));
-		String dimension = AddressTable.getRandomDimension(level, addressTable);
+		//TODO: make this actually work
+		AddressTableItem addressTable = AddressTableItem.getAddressTable(level, ResourceLocation.tryParse(this.addressTable));
+		Address address = addressTable.getRandomAddress(level);
+		StargateJourney.LOGGER.info(Address.addressIntArrayToString(address.toArray()));
 		if(dimension != null && !dimension.equals(EMPTY))
 			this.dimension = dimension;
 		this.addressTable = EMPTY;
+		this.address = address;
 	}
 	
 	public void setSymbols(Level level)

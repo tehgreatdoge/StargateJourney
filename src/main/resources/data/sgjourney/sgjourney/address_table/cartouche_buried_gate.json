@@ -1,7 +1,6 @@
 {
-	"include_generated_addresses": false,
-	"dimensions":
-	[
-		{"dimension": "sgjourney:abydos", "weight": 1}
+	"type": "sgjourney:pool",
+	"entries": [
+		{"type":"sgjourney:dimension","value":"sgjourney:abydos", "weight":1}
 	]
 }
