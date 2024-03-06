@@ -1,18 +1,20 @@
 package net.povstalec.sgjourney.common.block_entities;
 
+import javax.annotation.Nullable;
+
 import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.network.PacketDistributor;
 import net.povstalec.sgjourney.common.data.Universe;
 import net.povstalec.sgjourney.common.init.BlockEntityInit;
-import net.povstalec.sgjourney.common.init.PacketHandlerInit;
-import net.povstalec.sgjourney.common.packets.ClientboundSymbolUpdatePacket;
 
 public abstract class SymbolBlockEntity extends BlockEntity
 {
@@ -63,14 +65,28 @@ public abstract class SymbolBlockEntity extends BlockEntity
 		
 		symbol = Universe.get(level).getPointOfOrigin(level.dimension().location().toString());
 	}
-	
-	public void tick(Level level, BlockPos pos, BlockState state)
-	{
-		if(level.isClientSide())
-			return;
-		PacketHandlerInit.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> level.getChunkAt(this.worldPosition)), new ClientboundSymbolUpdatePacket(worldPosition, symbol));
+
+	//============================== Networking ==============================\\
+	@Override
+	public CompoundTag getUpdateTag() {
+		CompoundTag tag = super.getUpdateTag();
+		tag.putString(SYMBOL, symbol);
+		return tag;
+	}
+
+	@Override
+	public void handleUpdateTag(CompoundTag tag) {
+		// Use load for consistency with getUpdatePacket and because it already does the null check
+		this.load(tag);
 	}
 	
+	@Override
+	@Nullable
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+  		return ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	//=============================== Subtypes ===============================\\
 	public static class Stone extends SymbolBlockEntity
 	{
 		public Stone(BlockPos pos, BlockState state)

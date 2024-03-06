@@ -17,7 +17,6 @@ import net.povstalec.sgjourney.common.packets.ClientboundPegasusStargateUpdatePa
 import net.povstalec.sgjourney.common.packets.ClientboundRingPanelUpdatePacket;
 import net.povstalec.sgjourney.common.packets.ClientboundRingsUpdatePacket;
 import net.povstalec.sgjourney.common.packets.ClientboundStargateUpdatePacket;
-import net.povstalec.sgjourney.common.packets.ClientboundSymbolUpdatePacket;
 import net.povstalec.sgjourney.common.packets.ClientboundUniverseStargateUpdatePacket;
 import net.povstalec.sgjourney.common.packets.ServerboundDHDUpdatePacket;
 import net.povstalec.sgjourney.common.packets.ServerboundRingPanelUpdatePacket;
@@ -112,12 +111,6 @@ public final class PacketHandlerInit
 		.encoder(ClientboundCrystallizerUpdatePacket::encode)
 		.decoder(ClientboundCrystallizerUpdatePacket::new)
 		.consumerMainThread(ClientboundCrystallizerUpdatePacket::handle)
-		.add();
-		
-		INSTANCE.messageBuilder(ClientboundSymbolUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-		.encoder(ClientboundSymbolUpdatePacket::encode)
-		.decoder(ClientboundSymbolUpdatePacket::new)
-		.consumerMainThread(ClientboundSymbolUpdatePacket::handle)
 		.add();
 		
 		INSTANCE.messageBuilder(ClientboundCartoucheUpdatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
