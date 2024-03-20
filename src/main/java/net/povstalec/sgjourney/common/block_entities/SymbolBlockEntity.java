@@ -1,8 +1,7 @@
 package net.povstalec.sgjourney.common.block_entities;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +20,7 @@ public abstract class SymbolBlockEntity extends BlockEntity
 	private static final String SYMBOL = "Symbol";
 	private static final String EMPTY = "sgjourney:empty";
 	
+	@Nonnull
 	public String symbol = EMPTY;
 	
 	public SymbolBlockEntity(BlockEntityType<?> entity, BlockPos pos, BlockState state) 
@@ -32,8 +32,9 @@ public abstract class SymbolBlockEntity extends BlockEntity
 	public void onLoad()
 	{
 		super.onLoad();
-		
-		if(level.isClientSide())
+
+		Level level = getLevel();
+		if(level == null || level.isClientSide())
 			return;
 		
 		if(symbol.equals(EMPTY))
@@ -41,16 +42,17 @@ public abstract class SymbolBlockEntity extends BlockEntity
 	}
 	
 	@Override
-    public void load(CompoundTag tag)
+    public void load(@Nonnull CompoundTag tag)
     {
     	super.load(tag);
     	
-    	if(tag.contains(SYMBOL))
+    	if(tag.contains(SYMBOL, 8)) {
     		symbol = tag.getString(SYMBOL);
+		}
 	}
 	
 	@Override
-    protected void saveAdditional(@NotNull CompoundTag tag)
+    protected void saveAdditional(@Nonnull CompoundTag tag)
 	{
 		if(symbol != null)
 			tag.putString(SYMBOL, symbol);
@@ -64,6 +66,7 @@ public abstract class SymbolBlockEntity extends BlockEntity
 			return;
 		
 		symbol = Universe.get(level).getPointOfOrigin(level.dimension().location().toString());
+		this.setChanged();
 	}
 
 	//============================== Networking ==============================\\
@@ -76,8 +79,9 @@ public abstract class SymbolBlockEntity extends BlockEntity
 
 	@Override
 	public void handleUpdateTag(CompoundTag tag) {
-		// Use load for consistency with getUpdatePacket and because it already does the null check
-		this.load(tag);
+		if (tag != null) {
+			this.load(tag);
+		}
 	}
 	
 	@Override

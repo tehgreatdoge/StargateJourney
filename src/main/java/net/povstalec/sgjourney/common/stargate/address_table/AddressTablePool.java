@@ -30,7 +30,7 @@ public class AddressTablePool extends AddressTableItem {
     }
     @Override
     @Nullable
-    public Address getRandomAddress(Level level, Random random) {
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
         ArrayList<AddressTableItem> items = new ArrayList<>();
         this.getEntries().forEach(entry -> {
             int repeats = entry.getCalculatedWeight(level);

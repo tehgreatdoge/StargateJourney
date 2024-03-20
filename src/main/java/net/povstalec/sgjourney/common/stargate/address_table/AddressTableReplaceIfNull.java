@@ -33,8 +33,8 @@ public class AddressTableReplaceIfNull extends AddressTableItem {
     }
     @Override
     @Nullable
-    public Address getRandomAddress(Level level, Random random) {
-        Address result = value.getRandomAddress(level, random);
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
+        MultitypeAddress result = value.getRandomAddress(level, random);
         if (result == null) {
             return replace.getRandomAddress(level,random);
         }

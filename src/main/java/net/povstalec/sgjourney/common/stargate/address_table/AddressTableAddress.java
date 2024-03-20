@@ -17,9 +17,9 @@ public class AddressTableAddress extends AddressTableItem {
             Codec.INT.optionalFieldOf("weight",1).forGetter(AddressTableAddress::getWeight),
     		Codec.INT.listOf().fieldOf("value").forGetter(AddressTableAddress::getAddress)
 			).apply(instance, AddressTableAddress::new));
-
-    protected List<Integer> address;
-    public AddressTableAddress(Integer weight, List<Integer> address) {
+    @Nonnull
+    protected final List<Integer> address;
+    public AddressTableAddress(@Nonnull Integer weight, @Nonnull List<Integer> address) {
         super(weight);
         this.address = address;
     }
@@ -29,8 +29,8 @@ public class AddressTableAddress extends AddressTableItem {
     }
     @Override
     @Nonnull
-    public Address getRandomAddress(Level level, Random random) {
-        return new Address(address.stream().mapToInt(integer -> integer).toArray());
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
+        return new MultitypeAddress(new Address(address.stream().mapToInt(integer -> integer).toArray()));
     }
     public List<Integer> getAddress() {
         return address;

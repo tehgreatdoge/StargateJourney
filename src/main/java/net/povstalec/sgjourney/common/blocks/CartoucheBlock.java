@@ -2,6 +2,7 @@ package net.povstalec.sgjourney.common.blocks;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.ChatFormatting;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.povstalec.sgjourney.StargateJourney;
 import net.povstalec.sgjourney.common.block_entities.CartoucheEntity;
 import net.povstalec.sgjourney.common.blockstates.Orientation;
 import net.povstalec.sgjourney.common.config.ClientStargateConfig;
@@ -70,7 +72,7 @@ public abstract class CartoucheBlock extends HorizontalDirectionalBlock implemen
 	}
 
     @Override
-	public BlockState getStateForPlacement(BlockPlaceContext context) 
+	public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) 
 	{
 		BlockPos blockpos = context.getClickedPos();
 		Level level = context.getLevel();
@@ -83,6 +85,7 @@ public abstract class CartoucheBlock extends HorizontalDirectionalBlock implemen
 		
 		if(blockpos.getY() > maxBuildHeight || !level.getBlockState(blockpos.relative(Orientation.getMultiDirection(direction, Direction.UP, orientation))).canBeReplaced(context))
 		{
+			StargateJourney.LOGGER.trace("We finally caught them");
 			player.displayClientMessage(Component.translatable("block.sgjourney.cartouche.not_enough_space"), true);
 			return null;
 		}
@@ -146,7 +149,7 @@ public abstract class CartoucheBlock extends HorizontalDirectionalBlock implemen
 	public abstract Block getBlock();
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack stack)
+    public void setPlacedBy(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nullable LivingEntity entity, @Nonnull ItemStack stack)
     {
     	Orientation orientation = state.getValue(ORIENTATION);
     	Direction direction = state.getValue(FACING);
@@ -156,7 +159,7 @@ public abstract class CartoucheBlock extends HorizontalDirectionalBlock implemen
 	}
     
     @Override
-	public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player)
+	public void playerWillDestroy(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull Player player)
 	{
     	Direction direction = state.getValue(FACING);
     	Orientation orientation = state.getValue(ORIENTATION);
@@ -182,24 +185,8 @@ public abstract class CartoucheBlock extends HorizontalDirectionalBlock implemen
 		super.playerWillDestroy(level, pos, state, player);
 	}
 	
-	@Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
-	{
-        if (!level.isClientSide())
-        {
-            return (localLevel, pos, blockState, entity) -> {
-                if (entity instanceof CartoucheEntity cartouche) 
-                {
-                	cartouche.tick(localLevel, pos, blockState);
-                }
-            };
-        }
-        return null;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable BlockGetter getter, List<Component> tooltipComponents, TooltipFlag isAdvanced)
+    public void appendHoverText(@Nonnull ItemStack stack, @Nullable BlockGetter getter,@Nonnull  List<Component> tooltipComponents,@Nonnull  TooltipFlag isAdvanced)
     {
     	String dimension = "";
     	String symbols = "";

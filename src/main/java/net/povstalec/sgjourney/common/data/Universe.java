@@ -383,13 +383,24 @@ public class Universe extends SavedData
 	 * Returns the address to the specified dimension from the origin dimension.
 	 * Prefers Intragalactic addresses over Extragalactic ones
 	 * @param dimension The dimension to find an address for
-	 * @param origin The dimension to search from
-	 * @return An address as a string or null
+	 * @param origin The solar system to search from
+	 * @return An address as a string or null if not found
 	 */
 	@Nullable
 	public String getAddressToDimension(@Nonnull String dimension,@Nonnull String origin) {
-		ListTag originGalaxies = getGalaxiesFromDimension(origin);
-		ListTag galaxies = getGalaxiesFromDimension(dimension);
+		return getAddressToSolarSystem(getSolarSystemFromDimension(dimension), origin);
+	}
+	/**
+	 * Returns the address to the specified solar system from the origin solar system.
+	 * Prefers Intragalactic addresses over Extragalactic ones
+	 * @param solarSystem The solar system to find an address for
+	 * @param origin The solar system to search from
+	 * @return An address as a string or null if not found
+	 */
+	@Nullable
+	public String getAddressToSolarSystem(@Nonnull String solarSystem,@Nonnull String origin) {
+		ListTag originGalaxies = getGalaxiesFromSolarSystem(origin);
+		ListTag galaxies = getGalaxiesFromSolarSystem(solarSystem);
 		String out = null;
 		//This seems like a bad idea, who knows
 		for (int i=0; i<galaxies.size(); i++) {
@@ -404,13 +415,13 @@ public class Universe extends SavedData
 		if (out != null) {
 			return out;
 		}
-		out = getExtragalacticAddressFromDimension(dimension);
+		out = getSolarSystem(solarSystem).getString(EXTRAGALACTIC_ADDRESS);
 		if (out.equals(EMPTY)) {
 			return null;
 		}
 		return out;
 	}
-	
+
 	public String getSolarSystemFromDimension(String dimension)
 	{
 		if(!getDimensions().contains(dimension))

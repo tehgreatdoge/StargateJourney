@@ -3,6 +3,8 @@ package net.povstalec.sgjourney.common.stargate;
 import java.util.Map;
 import java.util.Random;
 
+import javax.annotation.Nonnull;
+
 import net.povstalec.sgjourney.common.misc.ArrayHelper;
 
 public class Address
@@ -11,6 +13,7 @@ public class Address
 	public static final int MIN_ADDRESS_LENGTH = 6;
 	public static final int MAX_ADDRESS_LENGTH = 9;
 	
+	@Nonnull
 	protected int[] addressArray = new int[0];
 	protected boolean isBuffer = false;
 	
@@ -23,8 +26,7 @@ public class Address
 	{
 		this(false);
 	}
-	
-	public Address(int[] addressArray)
+	public Address(@Nonnull int[] addressArray)
 	{
 		fromArray(addressArray);
 	}
@@ -55,7 +57,8 @@ public class Address
 		return this;
 	}
 	
-	public Address fromArray(int[] addressArray)
+	@Nonnull
+	public Address fromArray(@Nonnull int[] addressArray)
 	{
 		if(addressArray.length < getMaxAddressLength() &&
 				ArrayHelper.differentNumbers(addressArray) &&
@@ -67,27 +70,33 @@ public class Address
 	
 	public Address fromString(String addressString)
 	{
-		int[] addressArray = addressStringToIntArray(addressString);
+		int[] fromStringArray = addressStringToIntArray(addressString);
 		
-		if(addressArray.length < getMaxAddressLength() && ArrayHelper.differentNumbers(addressArray))
-			this.addressArray = addressArray;
+		if(fromStringArray.length < getMaxAddressLength() && ArrayHelper.differentNumbers(fromStringArray))
+			this.addressArray = fromStringArray;
 		
 		return this;
 	}
 	
 	public Address fromTable(Map<Double, Double> addressTable)
 	{
-		int[] addressArray = ArrayHelper.tableToArray(addressTable);
+		int[] addressTableArray = ArrayHelper.tableToArray(addressTable);
 		
-		if(addressArray.length < getMaxAddressLength() && ArrayHelper.differentNumbers(addressArray))
-			this.addressArray = addressArray;
+		if(addressTableArray.length < getMaxAddressLength() && ArrayHelper.differentNumbers(addressTableArray))
+			this.addressArray = addressTableArray;
 		
 		return this;
 	}
 	
+	@Nonnull
 	public int[] toArray()
 	{
 		return this.addressArray;
+	}
+	@Nonnull
+	public Address copy()
+	{
+		return new Address(isBuffer).fromArray(addressArray.clone());
 	}
 	
 	public int getLength()
@@ -157,7 +166,7 @@ public class Address
 		size = size > MAX_ADDRESS_LENGTH ? MAX_ADDRESS_LENGTH : size;
 		
 		Random random = new Random(seed);
-		int[] addressArray = new int[size];
+		int[] randomArray = new int[size];
 		boolean isValid = false;
 		
 		while(!isValid)
@@ -165,15 +174,15 @@ public class Address
 			for(int i = 0; i < size; i++)
 			{
 				if(i == 0 && prefix > 0 && prefix < limit)
-					addressArray[i] = prefix;
+					randomArray[i] = prefix;
 				else
-					addressArray[i] = random.nextInt(1, limit);
+					randomArray[i] = random.nextInt(1, limit);
 			}
-			if(ArrayHelper.differentNumbers(addressArray))
+			if(ArrayHelper.differentNumbers(randomArray))
 				isValid = true;
 		}
 		
-		this.addressArray = addressArray;
+		addressArray = randomArray;
 		
 		return this;
 	}
@@ -218,12 +227,12 @@ public class Address
 	
 	public static String addressIntArrayToString(int[] array)
 	{
-		String address = ADDRESS_DIVIDER;
+		StringBuilder address = new StringBuilder(ADDRESS_DIVIDER);
 		
 		for(int i = 0; i < array.length; i++)
 		{
-			address = address + array[i] + ADDRESS_DIVIDER;
+			address.append(array[i] + ADDRESS_DIVIDER);
 		}
-		return address;
+		return address.toString();
 	}
 }

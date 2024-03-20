@@ -12,7 +12,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.ModList;
 import net.povstalec.sgjourney.common.init.AddressTableItemInit;
-import net.povstalec.sgjourney.common.stargate.Address;
 
 /**
  * An address table item that returns a weight of zero if not all conditions are satisfied.
@@ -39,7 +38,7 @@ public class AddressTableConditional extends AddressTableItem {
     }
     @Override
     @Nullable
-    public Address getRandomAddress(Level level, Random random) {
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
         return value.getRandomAddress(level, random);
     }
     public List<Pair<String, String>> getConditions() {

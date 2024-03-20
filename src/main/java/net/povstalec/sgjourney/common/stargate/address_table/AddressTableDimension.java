@@ -13,7 +13,6 @@ import net.minecraft.world.level.Level;
 import net.povstalec.sgjourney.StargateJourney;
 import net.povstalec.sgjourney.common.data.Universe;
 import net.povstalec.sgjourney.common.init.AddressTableItemInit;
-import net.povstalec.sgjourney.common.stargate.Address;
 
 /**
  * An address table item that returns the address of a given dimension, with a preference for intragalactic connections.
@@ -42,17 +41,16 @@ public class AddressTableDimension extends AddressTableItem {
     @SuppressWarnings("null")
     @Nullable
     @Override
-    public Address getRandomAddress(Level level, Random random) {
-        Universe universe = Universe.get(level);
-        String address = null;
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
+        MultitypeAddress address = null;
         if (origin.isPresent()) {
-            address = universe.getAddressToDimension(dimension.location().toString(), origin.get().location().toString());
+            address = MultitypeAddress.fromDimension(dimension.location().toString(),false).withOrigin(origin.get().location().toString());
         }
         else {
-            address = universe.getAddressToDimension(dimension.location().toString(),level.dimension().location().toString());
+            address = MultitypeAddress.fromDimension(dimension.location().toString(),false).withOrigin(level.dimension().location().toString());
         }
-        if (address != null) {
-            return new Address(address);
+        if (address.getAsAddress(level, "") != null) {
+            return address;
         }
         return null;
     }

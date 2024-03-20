@@ -20,13 +20,13 @@ public abstract class AddressTableItem {
         this.weight = weight;
     }
     public abstract AddressTableItemType getType();
-
-    public Address getRandomAddress(Level level) {
+    @Nullable
+    public MultitypeAddress getRandomAddress(Level level) {
         return this.getRandomAddress(level, new Random());
     }
-
     @Nullable
-    public abstract Address getRandomAddress(Level level, Random random);
+    public abstract MultitypeAddress getRandomAddress(Level level, Random random);
+    
 	@Nullable
 	public static AddressTableItem getAddressTable(Level level, ResourceLocation table)
 	{

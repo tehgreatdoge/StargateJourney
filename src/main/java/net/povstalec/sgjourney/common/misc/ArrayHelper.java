@@ -6,17 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 public class ArrayHelper
 {
-	public static int[] growIntArray(int[] array, int x)
+	@Nonnull
+	public static int[] growIntArray(@Nonnull int[] array, int x)
 	{
-		int[] newarray = new int[array.length + 1];
-		
-		for (int i = 0; i < array.length; i++)
-		{
-			newarray[i] = array[i];
-		}
-		
+		int[] newarray = Arrays.copyOf(array, array.length + 1);
 		newarray[array.length] = x;
 		
 		return newarray;

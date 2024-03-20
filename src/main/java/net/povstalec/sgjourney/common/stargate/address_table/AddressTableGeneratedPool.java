@@ -14,7 +14,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.Level;
 import net.povstalec.sgjourney.common.data.Universe;
 import net.povstalec.sgjourney.common.init.AddressTableItemInit;
-import net.povstalec.sgjourney.common.stargate.Address;
 
 /**
  * A pool whose entries are automatically populated from the generated solar systems.
@@ -29,12 +28,12 @@ public class AddressTableGeneratedPool extends AddressTableItem {
     }
     @Override
     @Nullable
-    public Address getRandomAddress(Level level, Random random) {
-        List<String> generatedSystems = getGeneratedSolarSystems(level);
+    public MultitypeAddress getRandomAddress(Level level, Random random) {
+        List<String> generatedSystems = getGeneratedDimensions(level);
 
-        return new Address(generatedSystems.get(random.nextInt(generatedSystems.size())));
+        return MultitypeAddress.fromDimension(generatedSystems.get(random.nextInt(generatedSystems.size())),false);
     }
-    protected List<String> getGeneratedSolarSystems(Level level) {
+    protected List<String> getGeneratedDimensions(Level level) {
         List<String> generatedSystems = new ArrayList<>();
         Universe universe = Universe.get(level);
 		CompoundTag solarSystems = universe.getSolarSystems();
@@ -47,7 +46,10 @@ public class AddressTableGeneratedPool extends AddressTableItem {
 				
 				for(int i = 0; i < dimensionList.size(); i++)
 				{
-					generatedSystems.add(universe.getAddressToDimension(dimensionList.getString(0), level.dimension().location().toString()));
+                    var dimension = dimensionList.getString(i);
+                    if (dimension != null) {
+                        generatedSystems.add(dimension);
+                    }
 				}
 			}
 		});
